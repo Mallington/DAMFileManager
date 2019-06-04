@@ -1,16 +1,21 @@
 package com.company;
 
-import com.company.Controllers.FileViewScreenController;
+import com.company.controllers.FileViewScreenController;
 import com.company.UITools.Resource;
 import com.company.UITools.SceneUtils;
 import com.company.UITools.StageLoader;
 import com.company.UITools.StageRunnable;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.stage.Stage;
 
 public class Main {
+    private  static String[] arguments = null;
+
+    public static String[] getArguments() {
+        return arguments;
+    }
 
     public static void main(String[] args) {
+        arguments = args;
         StageLoader<FileViewScreenController> mainStage = new StageLoader<FileViewScreenController>();
 
         StageRunnable<FileViewScreenController> setup = new StageRunnable<FileViewScreenController>() {
@@ -28,8 +33,6 @@ public class Main {
 
 
         FileViewScreenController fileViewScreenController = mainStage.open(args, setup);
-
-        //new ObjectMapper().writeValueAsString(myItem);
     }
 
 }

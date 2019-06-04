@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -30,6 +31,73 @@ public class SceneUtils<controller> {
 
         for(EventHandler<ActionEvent> e : events) eventsList.add(e);
         return eventsList;
+    }
+    public static void displayOnPopupFXThread(String message){
+        new Thread(()-> Platform.runLater(()->SceneUtils.displayPopUp(message))).start();
+    }
+
+    public static void displayPopUp(String message) {
+        defaultPopupConfig(message, actionEventsList());
+    }
+
+    public static int comboBoxPopup(String message, List objects){
+        System.out.println("Displaying");
+        final int[] selected = {0};
+        AtomicBoolean done = new AtomicBoolean(false);
+        Platform.runLater(()->{
+            ComboBox comboBox = new ComboBox();
+            for(Object b : objects) comboBox.getItems().add(b);
+            EventHandler<ActionEvent> event = event1 -> {
+                selected[0] =
+                        comboBox.getSelectionModel().getSelectedIndex();
+                done.set(true);
+            };
+
+            defaultPopupConfig(message, actionEventsList(event), comboBox);
+        });
+
+        while(!done.get()) try{Thread.sleep(100); } catch(Exception e){}
+
+        return selected[0];
+    }
+
+    private static void defaultPopupConfig(String message,
+                                           List<EventHandler<ActionEvent>> closeEvents,
+                                           Node... nodes){
+        Stage popUp = new Stage();
+        popUp.initModality(Modality.WINDOW_MODAL);
+
+        Label messageLabel = new Label(message);
+        messageLabel.getStylesheets().add("style.css");
+        messageLabel.getStyleClass().add("text-label");
+
+        Button okButton = new Button("Ok");
+
+        EventHandler<ActionEvent> masterEvent = (ActionEvent event) -> {
+            for(EventHandler<ActionEvent> e : closeEvents) e.handle(event);
+            popUp.close();
+        };
+
+        okButton.setOnAction(masterEvent);
+        okButton.getStylesheets().add("style.css");
+        okButton.getStyleClass().add("basic-button");
+
+        VBox vBox = new VBox();
+        vBox.getChildren().add(messageLabel);
+
+        for(Node n : nodes) vBox.getChildren().add(n);
+
+        vBox.getChildren().add(okButton);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setPadding(new Insets(10));
+
+        Scene popUpScene = new Scene(vBox);
+        popUpScene.getStylesheets().add("style.css");
+        popUpScene.setOnKeyPressed(ke -> {
+            if (ke.getCode().equals(KeyCode.ENTER)) popUp.close();
+        });
+        popUp.setScene(popUpScene);
+        popUp.show();
     }
 
     public Resource<controller> getResource(String FXML){

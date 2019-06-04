@@ -32,7 +32,7 @@ public class Resource<ControllerType> {
         try {
             getNode();
         } catch (IOException e) {
-            System.out.println("Failed to fetch node");
+            System.out.println("Failed to fetchList node");
         }
     }
 
