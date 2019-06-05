@@ -5,18 +5,13 @@ import com.company.UITools.Resource;
 import com.company.UITools.SceneUtils;
 import com.company.UITools.StageLoader;
 import com.company.UITools.StageRunnable;
+import com.company.controllers.HomeScreenController;
+import com.company.windows.LoadingWindow;
 import javafx.stage.Stage;
 
 public class Main {
-    private  static String[] arguments = null;
-
-    public static String[] getArguments() {
-        return arguments;
-    }
-
     public static void main(String[] args) {
-        arguments = args;
-        StageLoader<FileViewScreenController> mainStage = new StageLoader<FileViewScreenController>();
+        /*StageLoader<FileViewScreenController> mainStage = new StageLoader<FileViewScreenController>();
 
         StageRunnable<FileViewScreenController> setup = new StageRunnable<FileViewScreenController>() {
             @Override
@@ -31,8 +26,26 @@ public class Main {
             }
         };
 
+        FileViewScreenController fileViewScreenController = mainStage.open(args, setup); */
 
-        FileViewScreenController fileViewScreenController = mainStage.open(args, setup);
+        new LoadingWindow(args).showAndHide(3000);
+
+        StageLoader<HomeScreenController> mainStage = new StageLoader<HomeScreenController>();
+
+        StageRunnable<HomeScreenController> setup = new StageRunnable<HomeScreenController>() {
+            @Override
+            protected Resource<HomeScreenController> setupStage(Stage stage) {
+                Resource<HomeScreenController> resource =
+                        new SceneUtils<HomeScreenController>().getResource("HomeScreen.fxml");
+
+                stage.setMinWidth(300);
+                stage.setMinHeight(300);
+
+                return resource;
+            }
+        };
+
+        HomeScreenController HomeScreenController = mainStage.open(args, setup);
     }
 
 }

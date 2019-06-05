@@ -4,6 +4,7 @@ import com.company.UITools.SceneUtils;
 import com.company.network.GeneralAPI;
 import com.company.data.Job;
 import com.company.data.SMBCredentials;
+import com.company.network.SMBCopy;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -67,6 +68,8 @@ public class FileViewScreenController implements Initializable {
             }
         });
         Platform.runLater(()-> jobSearchField.requestFocus());
+
+        Platform.runLater(()->jobSearchField.getScene().getWindow().centerOnScreen());
     }
 
     public void setProgress(double decimal){
@@ -92,8 +95,7 @@ public class FileViewScreenController implements Initializable {
                     try { displayJobs(currentJobs = jobAPI.fetchList( finalJobID +""));
                         setProgress(1.0);
                     } catch (Exception e) {
-                        e.printStackTrace();
-                    Platform.runLater(()->statusText.setText("Search Failed"));
+                    Platform.runLater(()->statusText.setText("Search Failed (No Connection)"));
                 }
 
                 }).start();
@@ -150,7 +152,7 @@ public class FileViewScreenController implements Initializable {
             Platform.runLater(()->statusText.setText("Uploading \""+dropped.getName()+"\" (Asset No. "+currentJobs.get(focused).getAssetId()+")"));
 
             //File upload
-            uploadFile(dropped, currentJobs.get(focused).getAssetId());
+            uploadFile(dropped, currentJobs.get(focused).getJobNo()+"_"+currentJobs.get(focused).getAssetId()+dropped.getName().substring(dropped.getName().lastIndexOf(".")));
 
             Platform.runLater(()->statusText.setText("Done."));
         }
@@ -173,11 +175,30 @@ public class FileViewScreenController implements Initializable {
         }).start();
     }
 
-    private void uploadFile(File f, int assetID){
+    private void uploadFile(File f, String name){
         SMBCredentials credentials = getCredentials();
 
         if(credentials !=null){
+            SMBCopy copier = new SMBCopy(credentials) {
+                @Override
+                public void updateProgress(double decimal) {
+                    Platform.runLater(()->updateProgress(decimal));
+                }
 
+                @Override
+                public void failed() {
+                    Platform.runLater(()->updateProgress(0.0));
+                    statusText.setText("Copy Failed.");
+                }
+
+                @Override
+                public void completeJob() {
+                    Platform.runLater(()->updateProgress(1.0));
+                    statusText.setText("Copy Complete");
+                }
+            };
+            System.out.println("Copying as "+name+", from "+f.getPath());
+            copier.copy(f, name);
         }
     }
 
