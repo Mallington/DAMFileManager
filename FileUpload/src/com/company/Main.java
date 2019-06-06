@@ -28,7 +28,7 @@ public class Main {
 
         FileViewScreenController fileViewScreenController = mainStage.open(args, setup); */
 
-        new LoadingWindow(args).showAndHide(3000);
+        new LoadingWindow(args).showAndHide(2000);
 
         StageLoader<HomeScreenController> mainStage = new StageLoader<HomeScreenController>();
 

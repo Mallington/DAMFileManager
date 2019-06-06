@@ -40,8 +40,6 @@ public class FileViewScreenController implements Initializable {
     @FXML
     TableView jobTable;
 
-    @FXML
-    TableView highLevelTable;
 
     private List<Job> currentJobs = null;
 
@@ -55,7 +53,7 @@ public class FileViewScreenController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setupTable(highLevelTable, topLevel);
+
         setupTable(jobTable, tableAttributes);
 
         jobSearchField.setOnKeyPressed(ke -> {
@@ -113,7 +111,16 @@ public class FileViewScreenController implements Initializable {
     }
 
     public void displayHeaderInfo(Job j){
-        highLevelTable.getItems().add(j);
+
+        for(String info : topLevel){
+            try {
+                TextField field = (TextField) jobSearchField.getScene().lookup("#" + info);
+                field.setText(j.getByReference(info));
+            }
+            catch(Exception e) {
+                System.out.println("Failed to populate: "+info);
+            }
+        }
     }
     public void displayJobs(List<Job> jobs){
         if(jobs.size()>0) {
@@ -143,7 +150,6 @@ public class FileViewScreenController implements Initializable {
 
     private void clearTables(){
         jobTable.getItems().clear();
-        highLevelTable.getItems().clear();
     }
 
     private void handleDroppedFile(File dropped){
@@ -169,7 +175,7 @@ public class FileViewScreenController implements Initializable {
     public void dropped(DragEvent event){
         List<File> files = event.getDragboard().getFiles();
         new Thread(()->{
-            Platform.runLater(()->jobTable.getParent().setDisable(true));
+            //Platform.runLater(()->jobTable.getParent().setDisable(true));
                 for(File file : files) handleDroppedFile(file);
             Platform.runLater(()->jobTable.getParent().setDisable(false));
         }).start();
@@ -182,7 +188,7 @@ public class FileViewScreenController implements Initializable {
             SMBCopy copier = new SMBCopy(credentials) {
                 @Override
                 public void updateProgress(double decimal) {
-                    Platform.runLater(()->updateProgress(decimal));
+                    Platform.runLater(()->setProgress(decimal));
                 }
 
                 @Override

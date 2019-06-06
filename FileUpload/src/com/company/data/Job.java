@@ -2,8 +2,10 @@ package com.company.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.lang.reflect.Field;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Job {
+public class Job extends FieldHelpers{
               private int jobNo;
               private int assetId;
               private String ISBN;
@@ -43,7 +45,7 @@ public class Job {
     public void setAssetId(int assetId) {
         this.assetId = assetId;
     }
-
+3
     public String getISBN() {
         return ISBN;
     }
@@ -140,4 +142,24 @@ public class Job {
         this.backMargin = backMargin;
     }
 
+    @Override
+    public Class getLowerClass() {
+        return Job.class;
+    }
+
+    @Override
+    public Object getLowerInstance() {
+        return this;
+    }
+
+    @Override
+    public String getByReference(String reference){
+        try {
+            return getLowerClass().getDeclaredField(reference).get(getLowerInstance()).toString();
+        } catch (Exception e) {
+            System.out.println("Failed to fetch field: "+reference);
+        }
+
+        return null;
+    }
 }

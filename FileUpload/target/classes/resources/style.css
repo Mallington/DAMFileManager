@@ -71,9 +71,14 @@
 }
 
 .top-bar {
-    -fx-border-color: "#222427";
+    /*
+    -fx-border-color: #d7df23;
+   -fx-background-color: #d7df23
+    */
     -fx-border-width: 1;
+    -fx-border-color: "#222427";
     -fx-background-color: #313335;
+
 
 }
 

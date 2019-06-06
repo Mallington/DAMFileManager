@@ -37,7 +37,7 @@
             </HBox>
          </top>
          <center>
-            <TilePane alignment="CENTER" hgap="5.0" prefHeight="400.0" prefWidth="629.0" vgap="5.0" BorderPane.alignment="CENTER">
+            <TilePane alignment="CENTER" hgap="5.0" style="-fx-background-image: url(&quot;forest.jpg&quot;);" prefHeight="400.0" prefWidth="629.0" vgap="5.0" BorderPane.alignment="CENTER">
                <children>
                   <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" onMouseClicked="#assets" prefHeight="200.0" prefWidth="200.0" styleClass="basic-button">
                      <children>
