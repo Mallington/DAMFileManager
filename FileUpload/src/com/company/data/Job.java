@@ -45,7 +45,7 @@ public class Job extends FieldHelpers{
     public void setAssetId(int assetId) {
         this.assetId = assetId;
     }
-3
+
     public String getISBN() {
         return ISBN;
     }
