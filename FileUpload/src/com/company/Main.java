@@ -7,6 +7,7 @@ import com.company.UITools.StageLoader;
 import com.company.UITools.StageRunnable;
 import com.company.controllers.HomeScreenController;
 import com.company.windows.LoadingWindow;
+import com.company.windows.LoginWindow;
 import javafx.stage.Stage;
 
 public class Main {
@@ -28,7 +29,21 @@ public class Main {
 
         FileViewScreenController fileViewScreenController = mainStage.open(args, setup); */
 
+
+        LoginWindow login = new LoginWindow() {
+            @Override
+            public boolean login(String username, String password) {
+                System.out.println("Login: ");
+                return true;
+            }
+        };
+
+        login.showAndWait(args);
+
+
         new LoadingWindow(args).showAndHide(2000);
+
+
 
         StageLoader<HomeScreenController> mainStage = new StageLoader<HomeScreenController>();
 

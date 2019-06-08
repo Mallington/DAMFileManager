@@ -1,22 +1,26 @@
 package com.company.controllers;
 
 import com.company.UITools.SceneUtils;
+import com.company.data.MenuResponse;
 import com.company.network.GeneralAPI;
 import com.company.data.Job;
 import com.company.data.SMBCredentials;
 import com.company.network.SMBCopy;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +42,7 @@ public class FileViewScreenController implements Initializable {
     ProgressBar progressBar;
 
     @FXML
-    TableView jobTable;
+    TableView<Job> jobTable;
 
 
     private List<Job> currentJobs = null;
@@ -49,6 +53,7 @@ public class FileViewScreenController implements Initializable {
 
     private GeneralAPI<Job> jobAPI = new GeneralAPI<>("http://AllingtonServer:86/api/asset/GetAsset/{0}", Job.class);
     private GeneralAPI<SMBCredentials> fileCredentials = new GeneralAPI<>("http://AllingtonServer:86/api/asset/GetUploadPath", SMBCredentials.class);
+    private GeneralAPI<MenuResponse> contextMenu = new GeneralAPI<>("http://AllingtonServer:86/api/asset/GetMenu/{0}/{1}", MenuResponse.class);
     //private GraphicsOverlay dragArea;
 
     @Override
@@ -65,6 +70,15 @@ public class FileViewScreenController implements Initializable {
                 }
             }
         });
+        Platform.runLater(()->{jobSearchField.getScene().setOnKeyPressed(ke -> {
+            if (ke.getCode().equals(KeyCode.ESCAPE)) {
+               back();
+            }
+        }); });
+
+
+
+
         Platform.runLater(()-> jobSearchField.requestFocus());
 
         Platform.runLater(()->jobSearchField.getScene().getWindow().centerOnScreen());
@@ -77,13 +91,17 @@ public class FileViewScreenController implements Initializable {
         });
     }
 
+    public void back(){
+        SceneUtils.setView((Stage)jobSearchField.getScene().getWindow(), "HomeScreen.fxml");
+    }
+
     public void searchJob() throws IOException {
         setProgress(0);
         String fieldVal = jobSearchField.getText().trim();
         int jobID = -1;
         try{ jobID = Integer.parseInt(fieldVal);} catch(Exception e){}
 
-        if(fieldVal.matches("[0-9]{1,10}") && jobID !=-1){
+        if(fieldVal !=null &&fieldVal.matches("[0-9]{1,10}") && jobID !=-1){
                 statusText.setText("Fetching");
                 setProgress(0.5);
             int finalJobID = jobID;
@@ -106,8 +124,6 @@ public class FileViewScreenController implements Initializable {
             jobSearchField.setText(null);
             statusText.setText("Invalid Input");
         }
-        System.out.println("Finished");
-
     }
 
     public void displayHeaderInfo(Job j){
@@ -138,8 +154,51 @@ public class FileViewScreenController implements Initializable {
             SceneUtils.displayOnPopupFXThread("No results");
         }
     }
-    private void setupTable(TableView table, String[] attributes){
+    private void setupTable(TableView<Job> table, String[] attributes){
+
+        table.setRowFactory(tv -> {
+            TableRow<Job> row = new TableRow<>();
+            row.setOnDragOver(event -> {
+                if (!row.isEmpty()) {
+                    table.getSelectionModel().select(row.getIndex());
+                    row.setBackground(new Background(new BackgroundFill(Color.valueOf("#d7df23"), new CornerRadii(3.0), Insets.EMPTY)));
+                }
+            });
+            row.setOnDragExited(event -> {
+                table.getSelectionModel().select(row.getIndex());
+                row.setBackground(Background.EMPTY);
+            });
+            row.setOnDragDropped(event -> {
+                table.getSelectionModel().select(row.getIndex());
+                row.setBackground(Background.EMPTY);
+            });
+
+            row.setOnMousePressed(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    if(event.getButton().equals(MouseButton.SECONDARY) &&!row.isEmpty()) row.setContextMenu(buildMenu(row.getIndex()));
+                }
+            });
+            return row ;
+        });
+
+
         for(String at : attributes) createColumn(table, at);
+    }
+
+    public ContextMenu buildMenu(int row){
+            ContextMenu menu = null;
+            try {
+                Job j = currentJobs.get(row);
+                List<MenuResponse> menuResponses = contextMenu.fetchList(j.getJobNo() + "", j.getAssetId() + "");
+                menu = new ContextMenu();
+                for (MenuResponse men : menuResponses) menu.getItems().add(new MenuItem(men.getMenuText()));
+            }
+            catch (Exception e){
+                System.out.println("Failed to build context menu");
+            }
+
+            return menu;
     }
 
     private void createColumn(TableView table ,String fieldName){
@@ -155,7 +214,7 @@ public class FileViewScreenController implements Initializable {
     private void handleDroppedFile(File dropped){
         try {
             int focused = jobTable.getSelectionModel().getFocusedIndex();
-            Platform.runLater(()->statusText.setText("Uploading \""+dropped.getName()+"\" (Asset No. "+currentJobs.get(focused).getAssetId()+")"));
+            Platform.runLater(()-> {if(currentJobs!=null && dropped !=null)statusText.setText("Uploading \""+dropped.getName()+"\" (Asset No. "+currentJobs.get(focused).getAssetId()+")");});
 
             //File upload
             uploadFile(dropped, currentJobs.get(focused).getJobNo()+"_"+currentJobs.get(focused).getAssetId()+dropped.getName().substring(dropped.getName().lastIndexOf(".")));

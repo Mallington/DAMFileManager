@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+
+<AnchorPane prefHeight="169.0" prefWidth="323.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.controllers.LoginWindowController">
+   <children>
+      <VBox alignment="CENTER" layoutX="172.0" layoutY="87.0" prefHeight="200.0" prefWidth="100.0" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <HBox alignment="CENTER" fillHeight="false" spacing="15.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="Login:" wrappingWidth="100.0" />
+                  <TextField fx:id="login" styleClass="text-box" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER" fillHeight="false" spacing="15.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="Password" wrappingWidth="100.0" />
+                  <PasswordField fx:id="password" styleClass="text-box" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER" fillHeight="false" spacing="15.0">
+               <children>
+                  <Text fx:id="status" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Please Login" wrappingWidth="223.0" />
+                  <Button fx:id="loginButton" mnemonicParsing="false" styleClass="basic-button" text="Login" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

@@ -21,6 +21,15 @@ public class Job extends FieldHelpers{
               private double headMargin;
               private double backMargin;
               private String status;
+              private String colour;
+
+    public String getColour() {
+        return colour;
+    }
+
+    public void setColour(String colour) {
+        this.colour = colour;
+    }
 
     public String getStatus() {
         return status;

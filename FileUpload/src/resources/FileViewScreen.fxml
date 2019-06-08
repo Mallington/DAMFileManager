@@ -30,7 +30,8 @@
                <children>
                   <HBox alignment="CENTER_LEFT" fillHeight="false" styleClass="top-bar">
                      <children>
-                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-label" text="Job Number:">
+                        <Button mnemonicParsing="false" onAction="#back" style="-fx-border-color: -accent-color;" styleClass="basic-button" text="Back" />
+                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="Job Number:">
                            <HBox.margin>
                               <Insets left="5.0" />
                            </HBox.margin>
@@ -46,55 +47,55 @@
                      <children>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="title" />
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="title" />
                               <TextField fx:id="title" editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fx:id="jobNo" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="jobNo" />
+                              <Text fx:id="jobNo" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="jobNo" />
                               <TextField editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="bookType" />
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="bookType" />
                               <TextField fx:id="bookType" editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="customer" />
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="customer" />
                               <TextField fx:id="customer" editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="coverFinish" />
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="coverFinish" />
                               <TextField fx:id="coverFinish" editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="extent" />
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="extent" />
                               <TextField fx:id="extent" editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="headMargin" />
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="headMargin" />
                               <TextField fx:id="headMargin" editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="backMargin" />
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="backMargin" />
                               <TextField fx:id="backMargin" editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="spineBulk" />
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="spineBulk" />
                               <TextField fx:id="spineBulk" editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
@@ -111,14 +112,14 @@
                <children>
                   <HBox alignment="BOTTOM_CENTER" fillHeight="false" spacing="5.0" styleClass="top-bar" VBox.vgrow="NEVER">
                      <children>
-                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-label" text="Progress: ">
+                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="Progress: ">
                            <HBox.margin>
                               <Insets />
                            </HBox.margin>
                         </Text>
                         <ProgressBar fx:id="progressBar" prefHeight="15.0" prefWidth="1500.0" progress="1.0" HBox.hgrow="ALWAYS" />
-                        <Text fx:id="progressPercentageText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-label" text="---%" />
-                        <Text fx:id="statusText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-label" text="Table Empty">
+                        <Text fx:id="progressPercentageText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="---%" />
+                        <Text fx:id="statusText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="Table Empty">
                            <HBox.margin>
                               <Insets />
                            </HBox.margin>

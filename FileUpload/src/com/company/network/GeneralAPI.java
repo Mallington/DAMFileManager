@@ -1,6 +1,7 @@
 package com.company.network;
 
 import com.company.data.Job;
+import com.company.data.MenuResponse;
 import com.company.data.SMBCredentials;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +31,9 @@ public class GeneralAPI<t>{
            response = response.replace("WindowsPath","windowsPath").replace("OtherPath","otherPath");
             return mapper.readValue(response, new TypeReference<List<SMBCredentials>>() {
             });
+        }else if(type.equals(MenuResponse.class)) {
+            return mapper.readValue(response, new TypeReference<List<MenuResponse>>() {
+            });
         }
         else{
             return mapper.readValue(response, new TypeReference<List<Object>>() {
@@ -52,6 +56,10 @@ public class GeneralAPI<t>{
         else if(type.equals(SMBCredentials.class)){
             response = response.replace("WindowsPath","windowsPath").replace("OtherPath","otherPath");
             return mapper.readValue(response, new TypeReference<SMBCredentials>() {
+            });
+        } else if(type.equals(MenuResponse.class)){
+            response = response.replace("WindowsPath","windowsPath").replace("OtherPath","otherPath");
+            return mapper.readValue(response, new TypeReference<MenuResponse>() {
             });
         }
         else{
