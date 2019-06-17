@@ -53,8 +53,8 @@
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Text fx:id="jobNo" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="jobNo" />
-                              <TextField editable="false" prefWidth="200.0" styleClass="text-box" />
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text" text="jobNo" />
+                              <TextField fx:id="jobNo" editable="false" prefWidth="200.0" styleClass="text-box" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" fillHeight="false" prefWidth="300.0" spacing="5.0">

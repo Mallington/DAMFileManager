@@ -1,47 +1,40 @@
 package com.company;
 
-import com.company.controllers.FileViewScreenController;
-import com.company.UITools.Resource;
-import com.company.UITools.SceneUtils;
-import com.company.UITools.StageLoader;
-import com.company.UITools.StageRunnable;
+import com.company.UI_tools.Resource;
+import com.company.UI_tools.SceneUtils;
+import com.company.UI_tools.StageLoader;
+import com.company.UI_tools.StageRunnable;
 import com.company.controllers.HomeScreenController;
+import com.company.network.DAMAPI;
 import com.company.windows.LoadingWindow;
 import com.company.windows.LoginWindow;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 public class Main {
     public static void main(String[] args) {
-        /*StageLoader<FileViewScreenController> mainStage = new StageLoader<FileViewScreenController>();
 
-        StageRunnable<FileViewScreenController> setup = new StageRunnable<FileViewScreenController>() {
-            @Override
-            protected Resource<FileViewScreenController> setupStage(Stage stage) {
-                Resource<FileViewScreenController> resource =
-                        new SceneUtils<FileViewScreenController>().getResource("FileViewScreen.fxml");
-
-                stage.setMinWidth(300);
-                stage.setMinHeight(300);
-
-                return resource;
-            }
-        };
-
-        FileViewScreenController fileViewScreenController = mainStage.open(args, setup); */
-
+        boolean quick = true;
 
         LoginWindow login = new LoginWindow() {
             @Override
             public boolean login(String username, String password) {
-                System.out.println("Login: ");
-                return true;
+                try {
+                    return  DAMAPI.getDamApi().connect(username, password);
+                } catch (Exception e) {
+                    System.out.println("Connection to API Failed");
+                    e.printStackTrace();
+                    return false;
+                }
             }
         };
-
-        login.showAndWait(args);
-
-
-        new LoadingWindow(args).showAndHide(2000);
+        if(!quick){
+            login.showAndWait(args);
+            new LoadingWindow(args).showAndHide(2000);
+        }
+        else {
+            login.showAndWait(args, "mat", "mnimaih2c");
+        }
 
 
 
@@ -61,6 +54,8 @@ public class Main {
         };
 
         HomeScreenController HomeScreenController = mainStage.open(args, setup);
+
+        if(quick) Platform.runLater(()->HomeScreenController.assets());
     }
 
 }

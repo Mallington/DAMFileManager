@@ -1,6 +1,6 @@
 package com.company.controllers;
 
-import com.company.UITools.SceneUtils;
+import com.company.UI_tools.SceneUtils;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;

@@ -1,11 +1,10 @@
 package com.company.windows;
 
-import com.company.UITools.Resource;
-import com.company.UITools.StageLoader;
-import com.company.UITools.StageRunnable;
-import com.company.controllers.HomeScreenController;
-import com.company.controllers.LoadingScreenController;
+import com.company.UI_tools.Resource;
+import com.company.UI_tools.StageLoader;
+import com.company.UI_tools.StageRunnable;
 import com.company.controllers.LoginWindowController;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -31,7 +30,7 @@ public abstract class LoginWindow {
         loader = new StageLoader<LoginWindowController>();
     }
 
-    public void showAndWait(String[] args){
+    public void showAndWait(String[] args, String userName, String password){
         controller = loader.open(args, SETUP);
 
         controller.setLoginListener(new EventHandler<ActionEvent>() {
@@ -48,8 +47,17 @@ public abstract class LoginWindow {
             }
         });
 
+        Platform.runLater(()->{
+            controller.setLogin(userName);
+            controller.setPassword(password);
+        });
+
         while(!exit) try{Thread.sleep(100);} catch(Exception e){}
         controller.close();
+    }
+
+    public void showAndWait(String[] args){
+        showAndWait(args, null, null);
     }
 
     public abstract boolean login(String username, String password);

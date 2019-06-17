@@ -54,6 +54,12 @@ public class LoginWindowController implements Initializable {
         return login.getText();
     }
 
+    public void setPassword(String pass) { password.setText(pass); }
+
+    public void setLogin(String user) {
+        login.setText(user);
+    }
+
     public void setStatus(String statusText){
         Platform.runLater(()->status.setText(statusText));
     }

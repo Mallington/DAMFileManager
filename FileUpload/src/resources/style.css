@@ -160,14 +160,16 @@
 }
 
 .table-row-cell {
+    -fx-border-insets: 0 0 0 -10, 0, 1, 2;
     -fx-background-color:  -primary-color; /*#616161*/
-    -fx-background-insets: 0, 0 0 1 0;
-    -fx-padding: 0.0em; /* 0 */
+    -fx-border-color:transparent;
 }
 .table-row-cell:selected {
-    -fx-border-color:  white; /*#616161*/
-    -fx-background-insets: 0, 0 0 1 0;
-    -fx-padding: 0.0em; /* 0 */
+    -fx-border-color: white;
+
+    /* -fx-border-color:  white;
+   -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0.0em;*/
 }
 
 

@@ -1,19 +1,20 @@
 package com.company.controllers;
 
-import com.company.UITools.SceneUtils;
+import com.company.UI_tools.SceneUtils;
 import com.company.data.MenuResponse;
-import com.company.network.GeneralAPI;
+import com.company.file_management.ManagementUtils;
+import com.company.network.DAMAPI;
 import com.company.data.Job;
 import com.company.data.SMBCredentials;
 import com.company.network.SMBCopy;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.*;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -51,36 +52,15 @@ public class FileViewScreenController implements Initializable {
     public static final String[] topLevel = {"title", "jobNo", "bookType", "customer", "coverFinish", "extent", "headMargin", "backMargin", "spineBulk"};
     public static final String[] tableAttributes = {"assetId", "assetType", "height", "isbn", "width", "status"};
 
-    private GeneralAPI<Job> jobAPI = new GeneralAPI<>("http://AllingtonServer:86/api/asset/GetAsset/{0}", Job.class);
-    private GeneralAPI<SMBCredentials> fileCredentials = new GeneralAPI<>("http://AllingtonServer:86/api/asset/GetUploadPath", SMBCredentials.class);
-    private GeneralAPI<MenuResponse> contextMenu = new GeneralAPI<>("http://AllingtonServer:86/api/asset/GetMenu/{0}/{1}", MenuResponse.class);
-    //private GraphicsOverlay dragArea;
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         setupTable(jobTable, tableAttributes);
 
-        jobSearchField.setOnKeyPressed(ke -> {
-            if (ke.getCode().equals(KeyCode.ENTER)) {
-                try {
-                    searchJob();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        Platform.runLater(()->{jobSearchField.getScene().setOnKeyPressed(ke -> {
-            if (ke.getCode().equals(KeyCode.ESCAPE)) {
-               back();
-            }
-        }); });
-
-
-
+        jobSearchField.setOnKeyPressed(ke -> { if (ke.getCode().equals(KeyCode.ENTER)) { try { searchJob(); } catch (IOException e) {}}});
+        Platform.runLater(()->{jobSearchField.getScene().setOnKeyPressed(ke -> {if (ke.getCode().equals(KeyCode.ESCAPE)) back(); }); });
 
         Platform.runLater(()-> jobSearchField.requestFocus());
-
         Platform.runLater(()->jobSearchField.getScene().getWindow().centerOnScreen());
     }
 
@@ -108,7 +88,7 @@ public class FileViewScreenController implements Initializable {
             new Thread(()->{
                     clearTables();
 
-                    try { displayJobs(currentJobs = jobAPI.fetchList( finalJobID +""));
+                    try { displayJobs(currentJobs = DAMAPI.getDamApi().getAssetByJobID(finalJobID));
                         setProgress(1.0);
                     } catch (Exception e) {
                     Platform.runLater(()->statusText.setText("Search Failed (No Connection)"));
@@ -131,9 +111,11 @@ public class FileViewScreenController implements Initializable {
         for(String info : topLevel){
             try {
                 TextField field = (TextField) jobSearchField.getScene().lookup("#" + info);
-                field.setText(j.getByReference(info));
+                String fetch = j.getByReference(info);
+                field.setText((fetch ==null)? "-":fetch);
             }
             catch(Exception e) {
+                e.printStackTrace();
                 System.out.println("Failed to populate: "+info);
             }
         }
@@ -162,6 +144,7 @@ public class FileViewScreenController implements Initializable {
                 if (!row.isEmpty()) {
                     table.getSelectionModel().select(row.getIndex());
                     row.setBackground(new Background(new BackgroundFill(Color.valueOf("#d7df23"), new CornerRadii(3.0), Insets.EMPTY)));
+                    row.setStyle("-fx-text-fill:  white");
                 }
             });
             row.setOnDragExited(event -> {
@@ -190,9 +173,14 @@ public class FileViewScreenController implements Initializable {
             ContextMenu menu = null;
             try {
                 Job j = currentJobs.get(row);
-                List<MenuResponse> menuResponses = contextMenu.fetchList(j.getJobNo() + "", j.getAssetId() + "");
                 menu = new ContextMenu();
-                for (MenuResponse men : menuResponses) menu.getItems().add(new MenuItem(men.getMenuText()));
+                for (MenuResponse men : DAMAPI.getDamApi().getActionables(j)) {
+                    MenuItem menuItem = new MenuItem(men.getMenuText());
+
+                    menuItem.setOnAction(getContextEventByName(currentJobs.get(row), men.getMenuText()));
+
+                    menu.getItems().add(menuItem);
+                }
             }
             catch (Exception e){
                 System.out.println("Failed to build context menu");
@@ -201,14 +189,64 @@ public class FileViewScreenController implements Initializable {
             return menu;
     }
 
+    public EventHandler<ActionEvent> getContextEventByName(Job job, String name){
+        Runnable toRun;
+
+        switch (name){
+            case "View Asset":
+                toRun = ()->{
+                    ManagementUtils.quickView(job, getCopyInstance());
+                };
+                break;
+
+            default:
+                toRun = ()-> SceneUtils.displayOnPopupFXThread("Operation is not yet supported.");
+                break;
+        }
+
+        return event -> new Thread(toRun).start();
+    }
+
     private void createColumn(TableView table ,String fieldName){
         TableColumn column = new TableColumn(fieldName);
-        column.setCellValueFactory(new PropertyValueFactory<Job, String>(fieldName));
+
+        column.setCellFactory(col -> {
+            return new TableCell<Job, String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    try {
+                        Job j = currentJobs.get(getTableRow().getIndex());
+                        setText(j.getByReference(fieldName));
+
+                        if(fieldName.equals("status")){
+                            setStyle("-fx-background-color: "+j.getColour()+"; -fx-text-fill: white;");
+                        }
+                    }
+                    catch (Exception e){}
+                }
+            };
+        });
         table.getColumns().addAll(column);
     }
 
     private void clearTables(){
         jobTable.getItems().clear();
+    }
+
+    //Drag and drop handlers
+
+    @FXML
+    public void dragOver(DragEvent event){
+        event.acceptTransferModes(TransferMode.COPY);
+    }
+    @FXML
+    public void dropped(DragEvent event){
+        List<File> files = event.getDragboard().getFiles();
+        new Thread(()->{
+                for(File file : files) handleDroppedFile(file);
+            Platform.runLater(()->jobTable.getParent().setDisable(false));
+        }).start();
     }
 
     private void handleDroppedFile(File dropped){
@@ -226,55 +264,50 @@ public class FileViewScreenController implements Initializable {
         }
     }
 
-    @FXML
-    public void dragOver(DragEvent event){
-        event.acceptTransferModes(TransferMode.COPY);
-    }
-    @FXML
-    public void dropped(DragEvent event){
-        List<File> files = event.getDragboard().getFiles();
-        new Thread(()->{
-            //Platform.runLater(()->jobTable.getParent().setDisable(true));
-                for(File file : files) handleDroppedFile(file);
-            Platform.runLater(()->jobTable.getParent().setDisable(false));
-        }).start();
-    }
 
+    //Remote File handling
     private void uploadFile(File f, String name){
-        SMBCredentials credentials = getCredentials();
+        SMBCopy copier = getCopyInstance();
 
-        if(credentials !=null){
-            SMBCopy copier = new SMBCopy(credentials) {
-                @Override
-                public void updateProgress(double decimal) {
-                    Platform.runLater(()->setProgress(decimal));
-                }
-
-                @Override
-                public void failed() {
-                    Platform.runLater(()->updateProgress(0.0));
-                    statusText.setText("Copy Failed.");
-                }
-
-                @Override
-                public void completeJob() {
-                    Platform.runLater(()->updateProgress(1.0));
-                    statusText.setText("Copy Complete");
-                }
-            };
+        if(copier!=null){
             System.out.println("Copying as "+name+", from "+f.getPath());
             copier.copy(f, name);
         }
     }
 
-    private SMBCredentials getCredentials(){
-        try {
-            System.out.println(fileCredentials.fetch());
-            return fileCredentials.fetch();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public SMBCopy getCopyInstance() {
+        SMBCredentials credentials = getCredentials();
+
+        if (credentials != null) {
+            return new SMBCopy(credentials) {
+                @Override
+                public void start() {
+                    Platform.runLater(()-> statusText.setText("Copying file"));
+                }
+
+                @Override
+                public void updateProgress(double decimal) {
+                    Platform.runLater(() -> setProgress(decimal));
+                }
+
+                @Override
+                public void failed() {
+                    Platform.runLater(() -> updateProgress(0.0));
+                    statusText.setText("Copy Failed.");
+                }
+
+                @Override
+                public void completeJob() {
+                    Platform.runLater(() -> updateProgress(1.0));
+                    statusText.setText("Copy Complete");
+                }
+            };
+        } else {
             return null;
         }
+    }
+    private SMBCredentials getCredentials(){
+        try { return DAMAPI.getDamApi().getSMBCredentials();} catch (Exception e) {return null;}
     }
 
 

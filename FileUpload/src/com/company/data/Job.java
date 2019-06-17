@@ -2,13 +2,11 @@ package com.company.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.lang.reflect.Field;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Job extends FieldHelpers{
               private int jobNo;
               private int assetId;
-              private String ISBN;
+              private String isbn;
               private String assetType;
               private int height;
               private int width;
@@ -55,12 +53,12 @@ public class Job extends FieldHelpers{
         this.assetId = assetId;
     }
 
-    public String getISBN() {
-        return ISBN;
+    public String getIsbn() {
+        return isbn;
     }
 
-    public void setISBN(String ISBN) {
-        this.ISBN = ISBN;
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
     }
 
     public String getAssetType() {
@@ -166,9 +164,7 @@ public class Job extends FieldHelpers{
         try {
             return getLowerClass().getDeclaredField(reference).get(getLowerInstance()).toString();
         } catch (Exception e) {
-            System.out.println("Failed to fetch field: "+reference);
+            return null;
         }
-
-        return null;
     }
 }

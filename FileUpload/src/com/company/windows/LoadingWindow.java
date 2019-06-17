@@ -1,8 +1,8 @@
 package com.company.windows;
 
-import com.company.UITools.Resource;
-import com.company.UITools.StageLoader;
-import com.company.UITools.StageRunnable;
+import com.company.UI_tools.Resource;
+import com.company.UI_tools.StageLoader;
+import com.company.UI_tools.StageRunnable;
 import com.company.controllers.LoadingScreenController;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
