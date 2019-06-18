@@ -8,6 +8,8 @@ import com.company.data.Job;
 import com.company.data.SMBCredentials;
 import com.company.network.SMBCopy;
 import javafx.application.Platform;
+import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -22,12 +24,15 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class FileViewScreenController implements Initializable {
     @FXML
@@ -45,17 +50,15 @@ public class FileViewScreenController implements Initializable {
     @FXML
     TableView<Job> jobTable;
 
-
-    private List<Job> currentJobs = null;
-
-
     public static final String[] topLevel = {"title", "jobNo", "bookType", "customer", "coverFinish", "extent", "headMargin", "backMargin", "spineBulk"};
     public static final String[] tableAttributes = {"assetId", "assetType", "height", "isbn", "width", "status"};
 
+    private int currentJobID =-1;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         setupTable(jobTable, tableAttributes);
+        setupTimer();
 
         jobSearchField.setOnKeyPressed(ke -> { if (ke.getCode().equals(KeyCode.ENTER)) { try { searchJob(); } catch (IOException e) {}}});
         Platform.runLater(()->{jobSearchField.getScene().setOnKeyPressed(ke -> {if (ke.getCode().equals(KeyCode.ESCAPE)) back(); }); });
@@ -65,14 +68,24 @@ public class FileViewScreenController implements Initializable {
     }
 
     public void setProgress(double decimal){
-        Platform.runLater(()->{
+
             progressBar.setProgress(decimal);
             progressPercentageText.setText((int)(100*decimal)+"%");
-        });
     }
 
     public void back(){
         SceneUtils.setView((Stage)jobSearchField.getScene().getWindow(), "HomeScreen.fxml");
+    }
+
+    public void updateView(boolean deepRefresh){
+        if(currentJobID>=0) {
+            try {
+                displayJobs(DAMAPI.getDamApi().getAssetByJobID(currentJobID), deepRefresh);
+            } catch (Exception e) {
+                System.out.println("caught");
+                Platform.runLater(() -> statusText.setText("Search Failed (No Connection)"));
+            }
+        }
     }
 
     public void searchJob() throws IOException {
@@ -84,17 +97,8 @@ public class FileViewScreenController implements Initializable {
         if(fieldVal !=null &&fieldVal.matches("[0-9]{1,10}") && jobID !=-1){
                 statusText.setText("Fetching");
                 setProgress(0.5);
-            int finalJobID = jobID;
-            new Thread(()->{
-                    clearTables();
-
-                    try { displayJobs(currentJobs = DAMAPI.getDamApi().getAssetByJobID(finalJobID));
-                        setProgress(1.0);
-                    } catch (Exception e) {
-                    Platform.runLater(()->statusText.setText("Search Failed (No Connection)"));
-                }
-
-                }).start();
+            currentJobID =jobID;
+            new Thread(()->Platform.runLater(()->updateView(true))).start();
 
         } else if(fieldVal.equals("")){
             jobSearchField.requestFocus();
@@ -120,19 +124,40 @@ public class FileViewScreenController implements Initializable {
             }
         }
     }
-    public void displayJobs(List<Job> jobs){
+    public void displayJobs(List<Job> jobs, boolean deepRefresh){
         if(jobs.size()>0) {
             displayHeaderInfo(jobs.get(0));
-            for(Job j : jobs) {
-                jobTable.getItems().add(j);
+
+            if(deepRefresh){
+                System.out.println("Deep");
+                clearTables();
+                for(Job j : jobs) jobTable.getItems().add(j);
+                jobTable.getSelectionModel().select(0);
+               jobTable.refresh();
+                setProgress(1.0);
+                statusText.setText("Found "+jobs.size()+" asset(s)");
             }
-            jobTable.getSelectionModel().select(0);
-            Platform.runLater(()->statusText.setText("Found "+jobs.size()+" asset(s)"));
+            else {
+                int prevSelect = jobTable.getSelectionModel().getSelectedIndex();
+
+                boolean changed = false;
+
+                for (int i = 0; i < jobs.size(); i++) {
+                    if (!jobs.get(i).matchesStatus(jobTable.getItems().get(i))) {
+                        jobTable.getItems().set(i, jobs.get(i));
+                        System.out.println("Update "+i);
+                        changed = true;
+                    }
+                }
+                if(changed) {
+
+                        jobTable.getSelectionModel().select(prevSelect);
+                        jobTable.refresh();
+                }
+            }
         }
         else{
-            Platform.runLater(()->{
                 statusText.setText("No Results");
-            });
             SceneUtils.displayOnPopupFXThread("No results");
         }
     }
@@ -169,15 +194,45 @@ public class FileViewScreenController implements Initializable {
         for(String at : attributes) createColumn(table, at);
     }
 
+    public void setupTimer(){
+       /* new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                updateView(false);
+            }
+        }, 0, 300); */
+
+      /*  ScheduledService svc = new ScheduledService<Void>() {
+            protected Task createTask() {
+                return new Task() {
+                    protected Void call() {
+                        System.out.println(jobTable.getItems().size());
+                        try {
+                            updateView(false);
+                        }
+                        catch (Exception e){
+                            System.out.println("Failed to update the view");
+                        }
+                        return null;
+                    }
+                };
+            }
+        };
+        svc.setPeriod(Duration.millis(500));
+        svc.start(); */
+
+
+    }
+
     public ContextMenu buildMenu(int row){
             ContextMenu menu = null;
             try {
-                Job j = currentJobs.get(row);
+                Job j = jobTable.getItems().get(row);
                 menu = new ContextMenu();
                 for (MenuResponse men : DAMAPI.getDamApi().getActionables(j)) {
                     MenuItem menuItem = new MenuItem(men.getMenuText());
 
-                    menuItem.setOnAction(getContextEventByName(currentJobs.get(row), men.getMenuText()));
+                    menuItem.setOnAction(getContextEventByName(jobTable.getItems().get(row), men.getMenuText()));
 
                     menu.getItems().add(menuItem);
                 }
@@ -216,7 +271,7 @@ public class FileViewScreenController implements Initializable {
                 protected void updateItem(String item, boolean empty) {
                     super.updateItem(item, empty);
                     try {
-                        Job j = currentJobs.get(getTableRow().getIndex());
+                        Job j = jobTable.getItems().get(getTableRow().getIndex());
                         setText(j.getByReference(fieldName));
 
                         if(fieldName.equals("status")){
@@ -252,10 +307,10 @@ public class FileViewScreenController implements Initializable {
     private void handleDroppedFile(File dropped){
         try {
             int focused = jobTable.getSelectionModel().getFocusedIndex();
-            Platform.runLater(()-> {if(currentJobs!=null && dropped !=null)statusText.setText("Uploading \""+dropped.getName()+"\" (Asset No. "+currentJobs.get(focused).getAssetId()+")");});
+            Platform.runLater(()-> {if(jobTable.getItems()!=null && dropped !=null)statusText.setText("Uploading \""+dropped.getName()+"\" (Asset No. "+jobTable.getItems().get(focused).getAssetId()+")");});
 
             //File upload
-            uploadFile(dropped, currentJobs.get(focused).getJobNo()+"_"+currentJobs.get(focused).getAssetId()+dropped.getName().substring(dropped.getName().lastIndexOf(".")));
+            uploadFile(dropped, jobTable.getItems().get(focused).getJobNo()+"_"+jobTable.getItems().get(focused).getAssetId()+dropped.getName().substring(dropped.getName().lastIndexOf(".")));
 
             Platform.runLater(()->statusText.setText("Done."));
         }
@@ -292,14 +347,18 @@ public class FileViewScreenController implements Initializable {
 
                 @Override
                 public void failed() {
-                    Platform.runLater(() -> updateProgress(0.0));
-                    statusText.setText("Copy Failed.");
+                    Platform.runLater(() -> {
+                        updateProgress(0.0);
+                        statusText.setText("Copy Failed.");
+                    });
                 }
 
                 @Override
                 public void completeJob() {
-                    Platform.runLater(() -> updateProgress(1.0));
-                    statusText.setText("Copy Complete");
+                    Platform.runLater(() -> {
+                        updateProgress(1.0);
+                        statusText.setText("Copy Complete");
+                    });
                 }
             };
         } else {

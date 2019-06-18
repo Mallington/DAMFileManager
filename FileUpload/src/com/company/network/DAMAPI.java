@@ -55,4 +55,8 @@ public class DAMAPI {
     public static DAMAPI getDamApi() {
         return DAM_API;
     }
+
+    public boolean checkoutAsset(int assetID){return true;}
+
+    public boolean commitAsset(int assetID){return true;}
 }

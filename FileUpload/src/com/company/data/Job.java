@@ -2,6 +2,8 @@ package com.company.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.lang.reflect.Field;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Job extends FieldHelpers{
               private int jobNo;
@@ -166,5 +168,9 @@ public class Job extends FieldHelpers{
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public boolean matchesStatus(Job compare){
+        return this.getStatus().equals(compare.getStatus());
     }
 }
