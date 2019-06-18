@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * @author mathew
- * Source from one of my previous projects: https://github.com/Mallington/OHR/blob/master/src/GUI/FilePicker.java
+ * Sourced from one of my previous projects: https://github.com/Mallington/OHR/blob/master/src/GUI/FilePicker.java
  */
 public class FilePicker {
 

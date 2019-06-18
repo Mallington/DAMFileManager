@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 
 public abstract class SMBCopy {
+
     private SMBCredentials credentials;
 
     private double progressStep = 0.001;
@@ -20,6 +21,7 @@ public abstract class SMBCopy {
     }
 
     public void copy(File toCopy, String destinationName){
+        System.out.println("Destination: "+destinationName);
             try{
                 NtlmPasswordAuthentication authentication = new NtlmPasswordAuthentication(null, credentials.getUserName(), credentials.getPassWord());
                 SmbFile destination = new SmbFile("smb:/"+credentials.getOtherPath()+destinationName, authentication);
@@ -56,7 +58,7 @@ public abstract class SMBCopy {
 
         } catch (Exception e) {
             failed();
-            e.printStackTrace();
+
         }
     }
 
@@ -98,6 +100,10 @@ public abstract class SMBCopy {
 
     public void setProgressStep(double progressStep) {
         this.progressStep = progressStep;
+    }
+
+    public void setCredentials(SMBCredentials credentials) {
+        this.credentials = credentials;
     }
 
     public abstract void start();

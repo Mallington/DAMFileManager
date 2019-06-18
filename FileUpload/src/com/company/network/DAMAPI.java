@@ -23,6 +23,7 @@ public class DAMAPI {
 
     private GeneralAPI<Job> jobAPI = new GeneralAPI<>(ENTRY_POINT+"/asset/GetAsset/{0}", Job.class);
     private GeneralAPI<SMBCredentials> fileCredentials = new GeneralAPI<>(ENTRY_POINT+"/asset/GetUploadPath", SMBCredentials.class);
+    private GeneralAPI<SMBCredentials> commit = new GeneralAPI<>(ENTRY_POINT+"/asset/Commit", SMBCredentials.class);
     private GeneralAPI<MenuResponse> contextMenu = new GeneralAPI<>(ENTRY_POINT+"/asset/GetMenu/{0}/{1}", MenuResponse.class);
     private GeneralAPI<Session> authentication = new GeneralAPI<>(ENTRY_POINT+"/asset/GetUser/{0}/{1}", Session.class);
 
@@ -48,7 +49,7 @@ public class DAMAPI {
         return  contextMenu.fetchList(sessionKey.getUserName() + "", j.getAssetId() + "");
     }
 
-    public String getArchiveaPath(Job job) throws IOException {
+    public String getArchivePath(Job job) throws IOException {
         return NetworkUtils.getURL(ENTRY_POINT+"/asset/GetArchivePath/"+job.getAssetId()).replace("\"","");
     }
 
@@ -56,7 +57,13 @@ public class DAMAPI {
         return DAM_API;
     }
 
-    public boolean checkoutAsset(int assetID){return true;}
+    public String checkoutAsset(int assetID) throws IOException {return NetworkUtils.getURL(ENTRY_POINT+"/asset/CheckoutAsset/"+assetID+"/"+sessionKey.getUserID()).replace("\"","");}
 
-    public boolean commitAsset(int assetID){return true;}
+    public SMBCredentials commitAsset(){
+        try {
+            return commit.fetch();
+        } catch (IOException e) {
+            return null;
+        }
+    }
 }

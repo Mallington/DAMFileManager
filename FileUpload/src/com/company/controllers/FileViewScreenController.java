@@ -1,15 +1,16 @@
 package com.company.controllers;
 
+import com.company.UI_tools.FilePicker;
 import com.company.UI_tools.SceneUtils;
 import com.company.data.MenuResponse;
-import com.company.file_management.ManagementUtils;
+import com.company.file_management.AssetFile;
+import com.company.file_management.AssetManager;
+import com.company.file_management.AssetUtils;
 import com.company.network.DAMAPI;
 import com.company.data.Job;
 import com.company.data.SMBCredentials;
 import com.company.network.SMBCopy;
 import javafx.application.Platform;
-import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -24,15 +25,12 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class FileViewScreenController implements Initializable {
     @FXML
@@ -54,8 +52,14 @@ public class FileViewScreenController implements Initializable {
     public static final String[] tableAttributes = {"assetId", "assetType", "height", "isbn", "width", "status"};
 
     private int currentJobID =-1;
+
+    AssetManager assetManager;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        assetManager = new AssetManager(getCopyInstance());
+
+        if(assetManager == null) System.out.println("Failed to init asset manager");
 
         setupTable(jobTable, tableAttributes);
         setupTimer();
@@ -250,7 +254,44 @@ public class FileViewScreenController implements Initializable {
         switch (name){
             case "View Asset":
                 toRun = ()->{
-                    ManagementUtils.quickView(job, getCopyInstance());
+                    if(!assetManager.viewAsset(job)) SceneUtils.displayOnPopupFXThread("Failed to view asset ID: "+job.getAssetId()+"\n There may be no asset, try uploading one.");
+                };
+                break;
+
+            case "Checkout Asset":
+                toRun = ()->{
+                    AssetFile assetFile =assetManager.checkoutJob(job);
+
+                    if(assetFile !=null) {
+                        AssetUtils.openPDFAsset(assetFile);
+                        updateViewInABit();
+                    }
+                    else SceneUtils.displayOnPopupFXThread("Failed to checkout asset ID: "+job.getAssetId()+"\n By accident? Or mad hacking skillz!?");
+                };
+                break;
+
+            case "Commit":
+                toRun = ()->{
+                    if(assetManager.commitCheckout(job)) {
+                        updateViewInABit();
+                    }
+                    else SceneUtils.displayOnPopupFXThread("Failed to commit asset ID: "+job.getAssetId()+"\n Oh dear");
+                };
+                break;
+
+            case "Upload Asset":
+                toRun = ()->{
+                    Stage stage = (Stage)jobTable.getScene().getWindow();
+
+                   FilePicker picker =  new FilePicker(".pdf", "PDF File", "Untitled");
+
+                   Platform.runLater(()->{
+                       File toUpload = picker.getFile(stage, FilePicker.OPEN);
+                        new Thread(()->{
+                            uploadFile(toUpload, job.getJobNo()+"_"+job.getAssetId()+".pdf");
+                            updateViewInABit();
+                       }).start();
+                   });
                 };
                 break;
 
@@ -260,6 +301,15 @@ public class FileViewScreenController implements Initializable {
         }
 
         return event -> new Thread(toRun).start();
+    }
+
+    private void updateViewInABit(){
+        new Thread(()->{
+
+            try{Thread.sleep(2500); } catch (Exception e){}
+            Platform.runLater(()-> updateView(false));
+
+        }).start();
     }
 
     private void createColumn(TableView table ,String fieldName){
@@ -307,12 +357,16 @@ public class FileViewScreenController implements Initializable {
     private void handleDroppedFile(File dropped){
         try {
             int focused = jobTable.getSelectionModel().getFocusedIndex();
+            //May hold up drag (beware)
+            updateView(false);
             Platform.runLater(()-> {if(jobTable.getItems()!=null && dropped !=null)statusText.setText("Uploading \""+dropped.getName()+"\" (Asset No. "+jobTable.getItems().get(focused).getAssetId()+")");});
 
             //File upload
             uploadFile(dropped, jobTable.getItems().get(focused).getJobNo()+"_"+jobTable.getItems().get(focused).getAssetId()+dropped.getName().substring(dropped.getName().lastIndexOf(".")));
 
             Platform.runLater(()->statusText.setText("Done."));
+
+            updateViewInABit();
         }
         catch(Exception e){
             SceneUtils.displayOnPopupFXThread("Please search for a jobAPI");
@@ -325,6 +379,7 @@ public class FileViewScreenController implements Initializable {
         SMBCopy copier = getCopyInstance();
 
         if(copier!=null){
+            copier.setCredentials(getCredentials());
             System.out.println("Copying as "+name+", from "+f.getPath());
             copier.copy(f, name);
         }
