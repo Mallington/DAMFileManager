@@ -14,4 +14,4 @@ Part of a DAM implementation for managing transfer of assets between print and m
 ## Preview
 ![Job View Screen](https://raw.githubusercontent.com/Mallington/DAMFileManager/master/Screen%20Shots/MainView.png)
 ## Client
-Build for use by Severn Print ltd. © Allington Industries 2019
+Built for use by Severn Print ltd. © Allington Industries 2019
