@@ -12,6 +12,6 @@ Part of a DAM implementation for managing transfer of assets between print and m
 * Mac OS, Windows or Linux
 * Java SE 7 or later
 ## Preview
-![Job View Screen](https://raw.githubusercontent.com/Mallington/DAMFileManager/master/Screen%20Shots/MainView.png?token=AGDLL37MLDNPHHNHEI7GLVC5BD2VK)
+![Job View Screen](https://raw.githubusercontent.com/Mallington/DAMFileManager/master/Screen%20Shots/MainView.png)
 ## Client
 Build for use by Severn Print ltd. © Allington Industries 2019
