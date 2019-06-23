@@ -1,9 +1,6 @@
 package com.company.network;
 
-import com.company.data.Job;
-import com.company.data.MenuResponse;
-import com.company.data.SMBCredentials;
-import com.company.data.Session;
+import com.company.data.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -11,15 +8,19 @@ import java.io.IOException;
 import java.util.List;
 
 public class GeneralAPI<t>{
-    private String URL;
+    private String params;
+
+    private Path root;
+
     private Class<t> type;
-    public GeneralAPI(String urlWithParams, Class<t> type){
+    public GeneralAPI(Path root, String urlWithParams, Class<t> type){
         this.type = type;
-        URL = urlWithParams;
+        params = urlWithParams;
+        this.root = root;
     }
 
     public  List<t> fetchList(String... param) throws Exception {
-        String request = URL;
+        String request = root.getCompletePath()+params;
         for(int i =0; i< param.length; i++) request = request.replace("{"+i+"}", param[i]);
 
         String response = NetworkUtils.getURL(request);
@@ -49,7 +50,7 @@ public class GeneralAPI<t>{
     }
 
     public  t fetch(String... param) throws IOException {
-        String request = URL;
+        String request = root.getCompletePath()+params;
         for(int i =0; i< param.length; i++) request = request.replace("{"+i+"}", param[i]);
 
         String response = NetworkUtils.getURL(request);

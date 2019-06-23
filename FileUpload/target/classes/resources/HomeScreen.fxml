@@ -36,29 +36,6 @@
                </padding>
             </HBox>
          </top>
-         <center>
-            <TilePane alignment="CENTER" hgap="5.0" style="-fx-background-image: url(&quot;forest.jpg&quot;);" prefHeight="400.0" prefWidth="629.0" vgap="5.0" BorderPane.alignment="CENTER">
-               <children>
-                  <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" onMouseClicked="#assets" prefHeight="200.0" prefWidth="200.0" styleClass="basic-button">
-                     <children>
-                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <VBox alignment="CENTER" prefHeight="148.0" prefWidth="178.0">
-                                 <children>
-                                    <ImageView fitHeight="160.0" fitWidth="160.0" styleClass="basic-button">
-                                       <image>
-                                          <Image url="@AssetsIcon.png" />
-                                       </image>
-                                    </ImageView>
-                                 </children>
-                              </VBox>
-                           </children>
-                        </HBox>
-                     </children>
-                  </AnchorPane>
-               </children>
-            </TilePane>
-         </center>
          <bottom>
             <HBox alignment="TOP_RIGHT" prefHeight="16.0" prefWidth="670.0" styleClass="top-bar" BorderPane.alignment="CENTER">
                <opaqueInsets>
@@ -72,6 +49,33 @@
                </children>
             </HBox>
          </bottom>
+         <center>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-image: url(&quot;forest.jpg&quot;);" BorderPane.alignment="CENTER">
+               <children>
+                  <TilePane fx:id="appPane" alignment="CENTER" hgap="5.0" prefHeight="400.0" prefWidth="629.0" vgap="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" onMouseClicked="#assets" prefHeight="200.0" prefWidth="200.0" styleClass="basic-button">
+                           <children>
+                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <VBox alignment="CENTER" prefHeight="148.0" prefWidth="178.0">
+                                       <children>
+                                          <ImageView fitHeight="160.0" fitWidth="160.0" styleClass="basic-button">
+                                             <image>
+                                                <Image url="@AssetsIcon.png" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </TilePane>
+               </children>
+            </AnchorPane>
+         </center>
       </BorderPane>
       <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="1000.0" AnchorPane.topAnchor="0.0">
          <children>

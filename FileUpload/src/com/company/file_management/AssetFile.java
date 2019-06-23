@@ -12,7 +12,7 @@ import java.util.UUID;
 public class AssetFile {
 
     public enum AssetMode{
-        VIEW_MODE, CHECKOUT_MODE
+        VIEW_MODE, CHECKOUT_MODE, MEND_ASSET
     }
 
     public static String TEMPORARY_SAVE_DIRECTORY = "";
@@ -71,6 +71,10 @@ public class AssetFile {
             smbCopy.setCredentials(copyCreds);
             smbCopy.read(originalDirectory, tempFileLocation);
         }
+    }
+
+    public void mendTemporaryFile(File actualLocation){
+        tempFileLocation = actualLocation;
     }
 
     public boolean canBeCommitted(){return checkedOut;}

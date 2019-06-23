@@ -1,14 +1,17 @@
 package com.company.windows;
 
+import animatefx.animation.*;
 import com.company.UI_tools.Resource;
 import com.company.UI_tools.StageLoader;
 import com.company.UI_tools.StageRunnable;
 import com.company.controllers.LoginWindowController;
+import com.company.network.DAMAPI;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
 
 public abstract class LoginWindow {
     private LoginWindowController controller;
@@ -32,7 +35,7 @@ public abstract class LoginWindow {
 
     public void showAndWait(String[] args, String userName, String password){
         controller = loader.open(args, SETUP);
-
+        new ZoomIn(controller.mainVBox).play();
         controller.setLoginListener(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -42,7 +45,8 @@ public abstract class LoginWindow {
                     exit = true;
                 }
                 else{
-                    controller.setStatus("Login failed");
+                    new Shake(controller.mainVBox).play();
+                    controller.setStatus("Please Try Again ("+DAMAPI.getDamApi().getApiPath().getAddress()+")");
                 }
             }
         });

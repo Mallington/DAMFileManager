@@ -5,11 +5,13 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -28,6 +30,9 @@ public class LoginWindowController implements Initializable {
 
     @FXML
     private Button loginButton;
+
+    @FXML
+    public VBox mainVBox;
 
 
     private EventHandler<KeyEvent> keyHandler = ke -> {
@@ -70,5 +75,9 @@ public class LoginWindowController implements Initializable {
 
     public void close() {
         Platform.runLater(()->loginButton.getScene().getWindow().hide());
+    }
+
+    public Scene getScene(){
+        return login.getScene();
     }
 }

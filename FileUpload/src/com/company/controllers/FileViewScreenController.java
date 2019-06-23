@@ -1,5 +1,7 @@
 package com.company.controllers;
 
+
+import animatefx.animation.*;
 import com.company.UI_tools.FilePicker;
 import com.company.UI_tools.SceneUtils;
 import com.company.data.MenuResponse;
@@ -21,6 +23,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.*;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -48,6 +51,9 @@ public class FileViewScreenController implements Initializable {
     @FXML
     TableView<Job> jobTable;
 
+    @FXML
+    BorderPane mainPane;
+
     public static final String[] topLevel = {"title", "jobNo", "bookType", "customer", "coverFinish", "extent", "headMargin", "backMargin", "spineBulk"};
     public static final String[] tableAttributes = {"assetId", "assetType", "height", "isbn", "width", "status"};
 
@@ -69,6 +75,7 @@ public class FileViewScreenController implements Initializable {
 
         Platform.runLater(()-> jobSearchField.requestFocus());
         Platform.runLater(()->jobSearchField.getScene().getWindow().centerOnScreen());
+
     }
 
     public void setProgress(double decimal){
@@ -93,16 +100,16 @@ public class FileViewScreenController implements Initializable {
     }
 
     public void searchJob() throws IOException {
-        setProgress(0);
         String fieldVal = jobSearchField.getText().trim();
         int jobID = -1;
         try{ jobID = Integer.parseInt(fieldVal);} catch(Exception e){}
 
         if(fieldVal !=null &&fieldVal.matches("[0-9]{1,10}") && jobID !=-1){
+                setProgress(0);
                 statusText.setText("Fetching");
                 setProgress(0.5);
-            currentJobID =jobID;
-            new Thread(()->Platform.runLater(()->updateView(true))).start();
+                 currentJobID =jobID;
+                new Thread(()->Platform.runLater(()->updateView(true))).start();
 
         } else if(fieldVal.equals("")){
             jobSearchField.requestFocus();
@@ -111,15 +118,38 @@ public class FileViewScreenController implements Initializable {
             SceneUtils.displayOnPopupFXThread("Invalid Input");
             jobSearchField.setText(null);
             statusText.setText("Invalid Input");
+
+            new Shake(jobSearchField).play();
         }
     }
 
-    public void displayHeaderInfo(Job j){
+    public void displayHeaderInfo(Job j, boolean deepRefresh){
 
         for(String info : topLevel){
             try {
                 TextField field = (TextField) jobSearchField.getScene().lookup("#" + info);
+
+                //For editing of attributes
+                if(field.isEditable()) {
+                    field.setOnKeyPressed(ke -> {
+                        if (ke.getCode().equals(KeyCode.ENTER)) {
+                            try {
+                                field.setStyle("-fx-border-color: green;");
+                                DAMAPI.getDamApi().updateJobAttribute(info, field.getText(), j);
+                                updateViewInABit();
+
+                            } catch (IOException e) {
+                                SceneUtils.displayOnPopupFXThread("Failed to set attribute: " + info);
+                            }
+                        }
+                        else{
+                            field.setStyle("-fx-border-color: red;");
+                        }
+                    });
+                }
+
                 String fetch = j.getByReference(info);
+                if(deepRefresh) new FadeIn(field).play();
                 field.setText((fetch ==null)? "-":fetch);
             }
             catch(Exception e) {
@@ -130,7 +160,7 @@ public class FileViewScreenController implements Initializable {
     }
     public void displayJobs(List<Job> jobs, boolean deepRefresh){
         if(jobs.size()>0) {
-            displayHeaderInfo(jobs.get(0));
+            displayHeaderInfo(jobs.get(0), deepRefresh);
 
             if(deepRefresh){
                 System.out.println("Deep");
@@ -140,6 +170,8 @@ public class FileViewScreenController implements Initializable {
                jobTable.refresh();
                 setProgress(1.0);
                 statusText.setText("Found "+jobs.size()+" asset(s)");
+                //Animation on refresh
+                new FadeIn(jobTable).play();
             }
             else {
                 int prevSelect = jobTable.getSelectionModel().getSelectedIndex();
@@ -191,6 +223,7 @@ public class FileViewScreenController implements Initializable {
                     if(event.getButton().equals(MouseButton.SECONDARY) &&!row.isEmpty()) row.setContextMenu(buildMenu(row.getIndex()));
                 }
             });
+
             return row ;
         });
 
@@ -260,7 +293,7 @@ public class FileViewScreenController implements Initializable {
 
             case "Checkout Asset":
                 toRun = ()->{
-                    AssetFile assetFile =assetManager.checkoutJob(job);
+                    AssetFile assetFile = assetManager.checkoutJob(job);
 
                     if(assetFile !=null) {
                         AssetUtils.openPDFAsset(assetFile);
@@ -275,7 +308,20 @@ public class FileViewScreenController implements Initializable {
                     if(assetManager.commitCheckout(job)) {
                         updateViewInABit();
                     }
-                    else SceneUtils.displayOnPopupFXThread("Failed to commit asset ID: "+job.getAssetId()+"\n Oh dear");
+                    else {
+                        SceneUtils.displayOnPopupFXThread("Failed to commit asset ID: "+job.getAssetId()+"\n Please specify the location of the file you'd like to commit.");
+                        FilePicker picker =  new FilePicker(".pdf", "PDF File", "Untitled");
+                        Stage stage = (Stage)jobTable.getScene().getWindow();
+                        Platform.runLater(()->{
+                            File toGet = picker.getFile( stage, FilePicker.OPEN);
+
+                            //need to add "Mend Asset"
+                            assetManager.checkoutJob(job);
+
+                            new Thread(()->assetManager.getAssetFile(job).mendTemporaryFile(toGet)).start();
+                        });
+
+                    }
                 };
                 break;
 
