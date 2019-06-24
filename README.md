@@ -16,9 +16,9 @@ Part of a DAM implementation for managing transfer of assets between print and m
 * Please Note: JRE 11 and above does not include JavaFX as default.
 * Run: `java - jar DAMFileManager.jar <commandline params> `
 ### Optional Parameters
-`-host <String> ` e.g "www.severnprint.co.uk"
-`-port <Integer> ` e.g 88
-`-protocol <String>` e.g "https://"
+* `-host <String> ` e.g "www.severnprint.co.uk"
+* `-port <Integer> ` e.g 88
+* `-protocol <String>` e.g "https://"
 ## Preview
 ![Job View Screen](https://raw.githubusercontent.com/Mallington/DAMFileManager/master/Screen%20Shots/MainView.png)
 ## Client
