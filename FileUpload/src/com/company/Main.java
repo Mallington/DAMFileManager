@@ -43,7 +43,7 @@ public class Main {
                 login.showAndWait(args);
                 new LoadingWindow(args).showAndHide(2000);
             } else {
-                login.showAndWait(args, "mat", "mnimaih2c");
+                login.showAndWait(args, "USERNAME", "PASSWORD");
             }
 
 
